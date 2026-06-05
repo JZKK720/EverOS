@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev, master]
+  pull_request:
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: lint + test + integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies (frozen)
+        run: make install-deps
+
+      - name: Lint (ruff + import-linter + datetime + openapi drift)
+        run: make lint
+
+      - name: Unit tests
+        run: make test
+
+      - name: Integration tests
+        run: make integration
