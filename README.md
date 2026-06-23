@@ -100,10 +100,16 @@ for fast retrieval and self-evolving reuse.
 
 - Python 3.12+
 - No API keys are needed for `everos demo`.
-- API keys are needed for the server-backed memory flow: OpenRouter for chat /
-  multimodal, and DeepInfra for embedding / rerank by default. You can use
-  other OpenAI-compatible providers by changing the matching `*__BASE_URL`
-  fields in `.env`.
+- To run the real server-backed memory flow, create two provider keys before
+  `everos init`:
+
+| Capability | Provider | Used for | Fill these `.env` slots |
+| --- | --- | --- | --- |
+| Chat + multimodal | [OpenRouter](https://openrouter.ai/) | `LLM` / `MULTIMODAL` | `EVEROS_LLM__API_KEY`, `EVEROS_MULTIMODAL__API_KEY` |
+| Embedding + rerank | [DeepInfra](https://deepinfra.com/) | `EMBEDDING` / `RERANK` | `EVEROS_EMBEDDING__API_KEY`, `EVEROS_RERANK__API_KEY` |
+
+You can use other OpenAI-compatible providers by changing the matching
+`*__BASE_URL` fields in `.env`.
 
 ### 1. Install
 
@@ -151,8 +157,9 @@ everos demo --plain
 ### 3. Configure
 
 Generate a starter `.env` file, then fill the four API key slots shown in the
-generated comments. Only two distinct keys are needed with the defaults:
-OpenRouter for `LLM` / `MULTIMODAL`, and DeepInfra for `EMBEDDING` / `RERANK`.
+generated comments. With the default setup, paste your OpenRouter key into the
+`LLM` / `MULTIMODAL` slots and your DeepInfra key into the `EMBEDDING` /
+`RERANK` slots.
 
 ```bash
 everos init
@@ -280,7 +287,7 @@ cd EverOS
 uv sync                              # creates ./.venv and installs deps
 source .venv/bin/activate            # or prefix commands with `uv run`
 everos demo --plain                  # try the local educational demo; no API keys needed
-everos init                          # fill the four API key slots in .env (two distinct keys)
+everos init                          # paste OpenRouter + DeepInfra keys into .env
 
 everos --help
 make test

@@ -98,10 +98,18 @@ agent trajectories 保存为可读 Markdown，并同步本地 SQLite 与 LanceDB
 
 - Python 3.12+
 - `everos demo` 不需要 API keys。
-- server-backed memory flow 需要 API keys：默认使用 OpenRouter 负责
-  chat / multimodal，DeepInfra 负责 embedding / rerank。也可以通过
-  `.env` 中对应的 `*__BASE_URL` 字段切换到其他 OpenAI-compatible
-  providers。
+- 如果要运行真正的 server-backed memory flow，中文默认推荐先在
+  [阿里云百炼控制台](https://bailian.console.aliyun.com/) 创建一个
+  DashScope API Key：
+
+| 能力 | 默认 Provider | 用途 | 填入这些 `.env` 字段 |
+| --- | --- | --- | --- |
+| Chat / extraction | [阿里云百炼 / DashScope](https://bailian.console.aliyun.com/) | `LLM` | `EVEROS_LLM__API_KEY` |
+| Embedding | [阿里云百炼 / DashScope](https://bailian.console.aliyun.com/) | `EMBEDDING` | `EVEROS_EMBEDDING__API_KEY` |
+| Re-rank | [阿里云百炼 / DashScope](https://bailian.console.aliyun.com/) | `RERANK` | `EVEROS_RERANK__API_KEY` |
+
+同一个 DashScope API Key 可以填到这三个 slot。多模态文件摄取仍通过
+`EVEROS_MULTIMODAL__*` 单独配置；如果只跑下面的文本记忆闭环，不需要先配置它。
 
 ### 1. 安装
 
@@ -147,9 +155,9 @@ everos demo --plain
 ### 3. 配置
 
 生成一个 starter `.env` 文件，然后根据生成的注释填入对应的 API key 字段。
-默认配置需要分别提供 [OpenRouter](https://openrouter.ai/) 和
-[DeepInfra](https://deepinfra.com/) 的 API key：OpenRouter 用于
-`LLM` / `MULTIMODAL`，DeepInfra 用于 `EMBEDDING` / `RERANK`。
+中文 quick start 默认推荐使用
+[阿里云百炼控制台](https://bailian.console.aliyun.com/) 的 DashScope API Key
+配置 `LLM` / `EMBEDDING` / `RERANK` 三个核心能力。
 
 ```bash
 everos init
@@ -159,6 +167,22 @@ cp .env.example .env
 
 `everos init` 默认写入 `./.env`。也可以使用 `everos init --xdg`
 写入 `${XDG_CONFIG_HOME:-~/.config}/everos/.env`。
+
+百炼三件套示例：
+
+```env
+EVEROS_LLM__MODEL=qwen-plus
+EVEROS_LLM__API_KEY=<DASHSCOPE_API_KEY>
+EVEROS_LLM__BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+
+EVEROS_EMBEDDING__MODEL=text-embedding-v4
+EVEROS_EMBEDDING__API_KEY=<DASHSCOPE_API_KEY>
+EVEROS_EMBEDDING__BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+
+EVEROS_RERANK__MODEL=gte-rerank-v2
+EVEROS_RERANK__API_KEY=<DASHSCOPE_API_KEY>
+EVEROS_RERANK__BASE_URL=https://dashscope.aliyuncs.com
+```
 
 ### 4. 启动 EverOS
 
@@ -271,7 +295,7 @@ cd EverOS
 uv sync                              # creates ./.venv and installs deps
 source .venv/bin/activate            # or prefix commands with `uv run`
 everos demo --plain                  # 先体验本地 educational demo；不需要 API keys
-everos init                          # fill the four API key slots in .env (two distinct keys)
+everos init                          # 把百炼 DashScope API Key 填进 .env
 
 everos --help
 make test
